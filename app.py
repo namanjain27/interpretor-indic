@@ -8,7 +8,9 @@ import base64
 import tempfile
 import traceback
 import streamlit as st
+from dotenv import load_dotenv
 from sarvamai import SarvamAI
+load_dotenv()
 
 # Page config
 st.set_page_config(
@@ -138,23 +140,52 @@ st.markdown("""
         padding: 0.5rem 0.75rem !important;
         font-size: 0.85rem !important;
         border: none !important;
+        border-radius: 6px !important;
+        transition: all 0.1s ease !important;
     }
     
-    /* Non-selected voice button (secondary) */
-    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="secondary"] {
+    /* Non-selected voice button (secondary) - solid color */
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="secondary"],
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[data-testid="baseButton-secondary"] {
         background: #664930 !important;
+        background-image: none !important;
         color: #CCBEB1 !important;
+        box-shadow: none !important;
     }
     
-    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="secondary"]:hover {
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="secondary"]:hover,
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[data-testid="baseButton-secondary"]:hover {
         background: #7a5a40 !important;
+        background-image: none !important;
     }
     
-    /* Selected voice button (primary) */
-    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="primary"] {
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="secondary"]:active,
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[data-testid="baseButton-secondary"]:active {
         background: #CCBEB1 !important;
+        background-image: none !important;
+        color: #664930 !important;
+    }
+    
+    /* Selected voice button (primary) - solid color */
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="primary"],
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[data-testid="baseButton-primary"] {
+        background: #CCBEB1 !important;
+        background-image: none !important;
         color: #664930 !important;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="primary"]:hover,
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[data-testid="baseButton-primary"]:hover {
+        background: #CCBEB1 !important;
+        background-image: none !important;
+    }
+    
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="primary"]:active,
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[data-testid="baseButton-primary"]:active {
+        background: #b8aa9d !important;
+        background-image: none !important;
+        box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.2) !important;
     }
     
     /* Generate button - gradient style */
@@ -339,7 +370,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize client
-API_KEY = "sk_s38hjjp8_HYDn5680HYwTsbkplbrSYFvI"
+
+API_KEY = os.getenv("SARVAM_API_KEY")
+if not API_KEY:
+    raise ValueError("SARVAM_API_KEY is not set")
 
 # Supported languages
 LANGUAGES = {

@@ -544,7 +544,7 @@ def main():
     st.markdown('<p class="section-label">Input Audio</p>', unsafe_allow_html=True)
     uploaded_file = st.file_uploader(
         "Upload audio file",
-        type=["wav", "mp3"],
+        type=["wav", "mp3", "opus", "ogg"],
         label_visibility="collapsed"
     )
     

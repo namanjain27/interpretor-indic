@@ -79,6 +79,7 @@ st.markdown("""
         border: none;
         border-radius: 8px;
         padding: 0.5rem;
+        margin-bottom: 0.75rem;
     }
     
     .stFileUploader > div > div {
@@ -131,111 +132,81 @@ st.markdown("""
         background: #997E67 !important;
     }
     
-    /* Voice toggle */
-    .voice-toggle {
-        display: flex;
-        background: #664930;
-        border-radius: 8px;
-        padding: 4px;
-        gap: 4px;
+    /* Voice toggle buttons - in nested columns */
+    div[data-testid="column"] div[data-testid="column"] .stButton > button {
+        margin-top: 0 !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.85rem !important;
+        border: none !important;
     }
     
-    .voice-btn {
-        flex: 1;
-        padding: 8px 16px;
-        border: none;
-        border-radius: 6px;
-        font-family: 'Source Sans Pro', sans-serif;
-        font-weight: 500;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background: transparent;
-        color: #CCBEB1;
-    }
-    
-    .voice-btn.active {
-        background: #997E67;
-        color: #FFDBBB;
-    }
-    
-    .voice-btn:hover:not(.active) {
-        background: rgba(153, 126, 103, 0.3);
-    }
-    
-    /* Toggle switch styling for streamlit */
-    .stRadio > div {
-        background: #664930;
-        border-radius: 8px;
-        padding: 0.4rem;
-        display: flex;
-        flex-direction: row !important;
-    }
-    
-    .stRadio > div > label {
-        flex: 1;
-        text-align: center;
-        padding: 0.4rem 0.8rem;
-        border-radius: 6px;
+    /* Non-selected voice button (secondary) */
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="secondary"] {
+        background: #664930 !important;
         color: #CCBEB1 !important;
-        font-family: 'Source Sans Pro', sans-serif;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin: 0 2px;
     }
     
-    .stRadio > div > label[data-checked="true"],
-    .stRadio > div > label:has(input:checked) {
-        background: #997E67;
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="secondary"]:hover {
+        background: #7a5a40 !important;
+    }
+    
+    /* Selected voice button (primary) */
+    div[data-testid="column"] div[data-testid="column"] .stButton > button[kind="primary"] {
+        background: #CCBEB1 !important;
+        color: #664930 !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Generate button - gradient style */
+    div[data-testid="stVerticalBlock"] > div > .stButton > button {
+        background: linear-gradient(135deg, #664930 0%, #997E67 100%) !important;
         color: #FFDBBB !important;
-    }
-    
-    .stRadio > div input {
-        display: none;
-    }
-    
-    /* Generate button */
-    .stButton > button {
-        background: linear-gradient(135deg, #664930 0%, #997E67 100%);
-        color: #FFDBBB;
         font-family: 'Source Sans Pro', sans-serif;
         font-weight: 600;
         font-size: 0.95rem;
         padding: 0.6rem 1.5rem;
         border-radius: 8px;
-        border: none;
+        border: none !important;
         width: 100%;
         transition: all 0.2s ease;
         margin-top: 0.5rem;
     }
     
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #997E67 0%, #664930 100%);
+    div[data-testid="stVerticalBlock"] > div > .stButton > button:hover {
+        background: linear-gradient(135deg, #997E67 0%, #664930 100%) !important;
         box-shadow: 0 4px 12px rgba(102, 73, 48, 0.3);
     }
     
-    /* Download button */
+    div[data-testid="stVerticalBlock"] > div > .stButton > button:disabled {
+        background: linear-gradient(135deg, #664930 0%, #997E67 100%) !important;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* Download button - same gradient as generate */
     .stDownloadButton > button {
-        background: #664930;
-        color: #FFDBBB;
+        background: linear-gradient(135deg, #664930 0%, #997E67 100%) !important;
+        color: #FFDBBB !important;
         font-family: 'Source Sans Pro', sans-serif;
         font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.6rem 1.5rem;
         border-radius: 8px;
-        border: none;
+        border: none !important;
     }
     
     .stDownloadButton > button:hover {
-        background: #997E67;
+        background: linear-gradient(135deg, #997E67 0%, #664930 100%) !important;
+        box-shadow: 0 4px 12px rgba(102, 73, 48, 0.3);
     }
     
-    /* Progress steps */
+    /* Progress steps - consistent style */
     .step-box {
         background: #997E67;
         border-left: 3px solid #664930;
         padding: 0.5rem 0.75rem;
         margin: 0.4rem 0;
-        border-radius: 0 6px 6px 0;
+        border-radius: 0;
         font-family: 'Source Sans Pro', sans-serif;
         font-size: 0.85rem;
         color: #FFDBBB;
@@ -246,28 +217,16 @@ st.markdown("""
         background: #664930;
     }
     
-    .step-box.complete {
-        border-left-color: #5a8a5a;
-        background: rgba(90, 138, 90, 0.3);
-    }
-    
     .step-box .step-title {
         font-weight: 600;
         color: #FFDBBB;
+        font-size: 0.85rem;
     }
     
     .step-box .step-detail {
         font-size: 0.8rem;
         color: #CCBEB1;
         margin-top: 0.2rem;
-    }
-    
-    .step-box .step-expand {
-        font-size: 0.75rem;
-        color: #FFDBBB;
-        opacity: 0.8;
-        margin-top: 0.15rem;
-        cursor: pointer;
     }
     
     /* Error box */
@@ -286,21 +245,15 @@ st.markdown("""
         font-size: 0.9rem;
     }
     
-    /* Success box */
-    .success-container {
-        background: rgba(90, 138, 90, 0.25);
-        border: 1px solid #5a8a5a;
-        border-radius: 8px;
-        padding: 0.6rem;
-        margin: 0.4rem 0;
-    }
-    
-    .success-title {
+    /* Success text - no background */
+    .success-text {
         font-family: 'Source Sans Pro', sans-serif;
         font-weight: 600;
-        color: #3d5c3d;
+        color: #664930;
         font-size: 0.9rem;
         text-align: center;
+        padding: 0.5rem 0;
+        margin: 0.4rem 0;
     }
     
     /* Audio player */
@@ -308,27 +261,58 @@ st.markdown("""
         margin: 0.4rem 0;
     }
     
-    /* Expander */
+    /* Expander - matching step box style */
     .stExpander {
-        background: #997E67;
-        border: none;
-        border-radius: 8px;
+        background: #997E67 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        margin: 0.4rem 0;
+        overflow: hidden;
     }
     
-    .stExpander > div > div > div > p {
+    .stExpander > details {
+        border: none !important;
+        background: #997E67 !important;
+        border-left: 3px solid #664930 !important;
+    }
+    
+    .stExpander > details > summary {
+        background: #997E67 !important;
+        border-radius: 0 !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .stExpander > details > summary > span {
+        font-family: 'Source Sans Pro', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
         color: #FFDBBB !important;
-        font-family: 'Source Sans Pro', sans-serif;
     }
     
-    .stExpander svg {
+    /* Fix expander arrow icon */
+    .stExpander > details > summary > svg {
         fill: #FFDBBB !important;
+        width: 1rem !important;
+        height: 1rem !important;
+    }
+    
+    /* Hide any text artifacts in expander */
+    .stExpander > details > summary::before,
+    .stExpander > details > summary::after {
+        content: none !important;
     }
     
     /* Text inside expanders */
+    .stExpander > details > div[data-testid="stExpanderDetails"] {
+        background: #997E67 !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+    
     .text-content {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(102, 73, 48, 0.3);
         padding: 0.75rem;
-        border-radius: 6px;
+        margin: 0;
         font-family: 'Source Sans Pro', sans-serif;
         font-size: 0.85rem;
         color: #FFDBBB;
@@ -336,11 +320,6 @@ st.markdown("""
         white-space: pre-wrap;
         word-wrap: break-word;
     }
-    
-    # /* Hide streamlit branding */
-    # #MainMenu {visibility: hidden;}
-    # footer {visibility: hidden;}
-    # header {visibility: hidden;}
     
     /* Reduce spacing */
     .stMarkdown {
@@ -352,30 +331,9 @@ st.markdown("""
         padding-bottom: 0;
     }
     
-    /* Custom toggle component */
-    .toggle-container {
-        background: #664930;
-        border-radius: 8px;
-        padding: 4px;
-        display: flex;
-        gap: 4px;
-    }
-    
-    .toggle-option {
-        flex: 1;
-        text-align: center;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-family: 'Source Sans Pro', sans-serif;
-        font-size: 0.85rem;
-        color: #CCBEB1;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .toggle-option.selected {
-        background: #997E67;
-        color: #FFDBBB;
+    /* Audio spacer */
+    .audio-spacer {
+        height: 0.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -534,9 +492,11 @@ def run_pipeline(audio_bytes: bytes, filename: str, target_lang: str, speaker: s
 
 
 def main():
-    # Initialize session state for voice toggle
+    # Initialize session state
     if 'voice' not in st.session_state:
         st.session_state.voice = 'simran'
+    if 'processing' not in st.session_state:
+        st.session_state.processing = False
     
     # Header
     st.markdown('''
@@ -555,6 +515,7 @@ def main():
     )
     
     if uploaded_file:
+        st.markdown('<div class="audio-spacer"></div>', unsafe_allow_html=True)
         st.audio(uploaded_file, format=f"audio/{uploaded_file.name.split('.')[-1]}")
     
     # Two columns for language and voice
@@ -574,20 +535,26 @@ def main():
         # Toggle button using columns
         toggle_col1, toggle_col2 = st.columns(2)
         with toggle_col1:
-            if st.button("Female", use_container_width=True, type="primary" if st.session_state.voice == 'simran' else "secondary"):
+            if st.button("Female", use_container_width=True, 
+                        type="primary" if st.session_state.voice == 'simran' else "secondary",
+                        disabled=st.session_state.processing):
                 st.session_state.voice = 'simran'
                 st.rerun()
         with toggle_col2:
-            if st.button("Male", use_container_width=True, type="primary" if st.session_state.voice == 'shubh' else "secondary"):
+            if st.button("Male", use_container_width=True, 
+                        type="primary" if st.session_state.voice == 'shubh' else "secondary",
+                        disabled=st.session_state.processing):
                 st.session_state.voice = 'shubh'
                 st.rerun()
     
     # Generate button
-    if st.button("Generate Translated Audio", use_container_width=True, key="generate"):
-        if not uploaded_file:
-            st.error("Please upload an audio file first")
-            return
-        
+    generate_disabled = st.session_state.processing or not uploaded_file
+    if st.button("Generate Translated Audio", use_container_width=True, key="generate", disabled=generate_disabled):
+        st.session_state.processing = True
+        st.rerun()
+    
+    # Process if flagged
+    if st.session_state.processing and uploaded_file:
         # Create placeholders for each step
         step_placeholders = {
             "step1": st.empty(),
@@ -634,20 +601,20 @@ def main():
             step_placeholders["step2"].empty()
             with step_placeholders["step2"].container():
                 if details["skipped_translation"]:
-                    st.markdown('<div class="step-box complete"><span class="step-title">Step 2: Translation</span><div class="step-detail">Skipped (same language)</div></div>', unsafe_allow_html=True)
+                    st.markdown('<div class="step-box"><span class="step-title">Step 2: Translation</span><div class="step-detail">Skipped (same language)</div></div>', unsafe_allow_html=True)
                 else:
                     with st.expander(f"Step 2: Translation - {details['source_lang']} to {target_lang_code}", expanded=False):
                         st.markdown(f'<div class="text-content">{details["translated"]}</div>', unsafe_allow_html=True)
             
-            # Update step 3
+            # Update step 3 - same style as before
             step_placeholders["step3"].markdown(
-                '<div class="step-box complete"><span class="step-title">Step 3: Text to Speech</span><div class="step-detail">Audio generated successfully</div></div>',
+                '<div class="step-box"><span class="step-title">Step 3: Text to Speech</span><div class="step-detail">Audio generated successfully</div></div>',
                 unsafe_allow_html=True
             )
             
-            # Success
+            # Success - just text, no background
             with result_container:
-                st.markdown('<div class="success-container"><p class="success-title">Translation Complete</p></div>', unsafe_allow_html=True)
+                st.markdown('<p class="success-text">Translation Complete</p>', unsafe_allow_html=True)
                 
                 st.markdown('<p class="section-label">Preview</p>', unsafe_allow_html=True)
                 st.audio(result_audio, format="audio/wav")
@@ -678,6 +645,9 @@ def main():
                         height=120,
                         label_visibility="collapsed"
                     )
+        
+        finally:
+            st.session_state.processing = False
 
 
 if __name__ == "__main__":

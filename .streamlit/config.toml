@@ -1,0 +1,12 @@
+[server]
+maxUploadSize = 25  # MB; WhatsApp voice notes are tiny, this just stops abuse
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#7a5236"
+
+[client]
+toolbarMode = "minimal"

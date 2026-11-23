@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Your key can only ever be sent to api.sarvam.ai: no other server is reachable from this page. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; connect-src 'self' https://api.sarvam.ai; media-src 'self' blob: data:; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>Voice Note Interpreter</title>
+  <meta name="description" content="Understand any Indian-language voice note, in your language. Powered by Sarvam AI.">
+  <meta name="theme-color" content="#7a5236">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Interpreter">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+<main>
+  <header class="top">
+    <h1>Voice Note Interpreter</h1>
+    <p class="sub">Understand any Indian-language voice note, in your language.</p>
+  </header>
+
+  <!-- Key screen -->
+  <section id="keyScreen" hidden>
+    <form id="keyForm" class="card" autocomplete="off">
+      <label for="keyInput">Sarvam API key</label>
+      <input id="keyInput" type="password" placeholder="sk_..." spellcheck="false" autocapitalize="off" required>
+      <label class="check"><input id="remember" type="checkbox" checked> Remember on this device</label>
+      <button id="keyBtn" class="primary" type="submit">Continue</button>
+      <p id="keyError" class="error" role="alert" hidden></p>
+    </form>
+    <p class="muted">No key? Get one free at <a href="https://dashboard.sarvam.ai" target="_blank" rel="noopener">dashboard.sarvam.ai</a>.</p>
+  </section>
+
+  <!-- Main screen -->
+  <section id="mainScreen" hidden>
+    <div class="row">
+      <label for="lang">Translate to</label>
+      <select id="lang"></select>
+    </div>
+
+    <details class="card options">
+      <summary>Voice &amp; options</summary>
+      <div class="seg" role="radiogroup" aria-label="Voice">
+        <label><input type="radio" name="gender" value="female" checked> Female</label>
+        <label><input type="radio" name="gender" value="male"> Male</label>
+      </div>
+      <label class="check"><input id="speakToggle" type="checkbox" checked> Read the translation aloud</label>
+      <label for="pace">Speed <output id="paceOut">1.00×</output></label>
+      <input id="pace" type="range" min="0.75" max="1.5" step="0.05" value="1">
+    </details>
+
+    <div class="actions">
+      <label class="primary big file-btn">
+        <input id="fileInput" type="file" accept="audio/*,.opus,.ogg,.oga,.m4a,.mp3,.wav,.aac,.amr,.webm,.3gp">
+        Choose voice note
+      </label>
+      <button id="recBtn" class="secondary big" type="button">● Record</button>
+    </div>
+
+    <details class="card help" id="help">
+      <summary>How do I get a voice note out of WhatsApp?</summary>
+      <h3>Android (easiest)</h3>
+      <ol>
+        <li>Install this app: browser menu ⋮ → <b>Install app</b> / <b>Add to Home screen</b>.</li>
+        <li>In WhatsApp, long-press the voice note → <b>Share</b> → pick <b>Interpreter</b>.</li>
+        <li>It opens here and translates automatically.</li>
+      </ol>
+      <h3>iPhone</h3>
+      <ol>
+        <li>Long-press the voice note → <b>Forward</b> → tap the <b>Share</b> icon (bottom-right) → <b>Save to Files</b>.</li>
+        <li>Come back here → <b>Choose voice note</b> → <b>Browse</b> → pick the saved file.</li>
+        <li>To install: Safari Share button → <b>Add to Home Screen</b>.</li>
+      </ol>
+      <h3>WhatsApp Web / Desktop</h3>
+      <p>Hover the voice note → ⌄ → <b>Download</b>, then choose it here.</p>
+      <p class="muted">No conversion needed: WhatsApp's .opus/.ogg, plus .m4a, .mp3, .wav and .aac all work.
+        Someone talking in front of you? Tap <b>Record</b>.</p>
+    </details>
+
+    <p id="status" class="status" role="status" aria-live="polite" hidden></p>
+    <p id="error" class="error" role="alert" hidden></p>
+
+    <section id="result" hidden>
+      <div class="card result">
+        <div class="result-head">
+          <span id="targetLabel" class="label"></span>
+          <button class="copy" type="button" data-copy="translation">Copy</button>
+        </div>
+        <p id="translation" class="big-text"></p>
+      </div>
+      <div id="audioBox" hidden>
+        <audio id="player" controls></audio>
+        <div class="actions">
+          <a id="saveBtn" class="secondary" download>Save audio</a>
+          <button id="shareBtn" class="secondary" type="button" hidden>Share audio</button>
+        </div>
+      </div>
+      <details class="card">
+        <summary id="sourceLabel">Original</summary>
+        <div class="result-head">
+          <span class="label">Transcript</span>
+          <button class="copy" type="button" data-copy="transcript">Copy</button>
+        </div>
+        <p id="transcript" class="big-text"></p>
+      </details>
+      <p id="timing" class="muted"></p>
+    </section>
+  </section>
+
+  <button id="installBtn" class="secondary install" type="button" hidden>Install app</button>
+
+  <footer>
+    <p class="reassure">🔒 Open source. Your key stays on your device and only ever goes to Sarvam AI.
+      <a href="https://github.com/namanjain27/interpretor-indic" target="_blank" rel="noopener">Check the code on GitHub</a></p>
+    <p class="muted"><span id="who"></span> <button id="forgetBtn" class="link" type="button" hidden>Change / forget key</button></p>
+    <p class="muted">Built by <a href="https://namanjain27.github.io/" target="_blank" rel="noopener">Naman Jain</a> · Powered by Sarvam AI</p>
+  </footer>
+</main>
+<div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

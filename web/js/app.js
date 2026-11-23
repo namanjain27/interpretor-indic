@@ -24,9 +24,9 @@ function showScreen() {
   const key = getKey();
   $("keyScreen").hidden = !!key;
   $("mainScreen").hidden = !key;
-  $("forgetBtn").hidden = !key;
-  $("who").textContent = key ? `Using your key (…${key.slice(-4)})` : "";
-  if (key && pendingShared) { const f = pendingShared; pendingShared = null; run(f, f.name); }
+  $("settingsBtn").hidden = !key;
+  $("who").textContent = key ? `Saved on this device, ending …${key.slice(-4)}` : "";
+  if (key && pendingShared) { const { blob, name } = pendingShared; pendingShared = null; run(blob, name); }
 }
 
 $("keyForm").addEventListener("submit", async (e) => {
@@ -34,7 +34,7 @@ $("keyForm").addEventListener("submit", async (e) => {
   const key = $("keyInput").value.trim();
   $("keyError").hidden = true;
   $("keyBtn").disabled = true;
-  $("keyBtn").textContent = "Checking…";
+  $("keyBtn").textContent = "Checking key…";
   try {
     await sarvam.validateKey(key);
     store.set(KEY, key, !$("remember").checked);
@@ -45,13 +45,20 @@ $("keyForm").addEventListener("submit", async (e) => {
     $("keyError").hidden = false;
   } finally {
     $("keyBtn").disabled = false;
-    $("keyBtn").textContent = "Continue";
+    $("keyBtn").textContent = "Get started";
   }
 });
 
+$("settingsBtn").addEventListener("click", () => $("settings").showModal());
+$("helpBtn").addEventListener("click", () => $("help").showModal());
+for (const d of document.querySelectorAll("dialog.sheet")) {
+  d.addEventListener("click", (e) => { if (e.target === d) d.close(); }); // tap backdrop to close
+}
+
 $("forgetBtn").addEventListener("click", () => {
   store.del(KEY);
-  $("result").hidden = true;
+  $("settings").close();
+  resetResult();
   showScreen();
 });
 
@@ -71,10 +78,13 @@ const opts = () => ({
   speak: $("speakToggle").checked,
   pace: parseFloat($("pace").value),
 });
-const updatePace = () => { $("paceOut").textContent = `${parseFloat($("pace").value).toFixed(2)}×`; $("pace").disabled = !$("speakToggle").checked; };
+const updatePace = () => {
+  $("paceOut").textContent = `${parseFloat($("pace").value).toFixed(2)}×`;
+  $("pace").disabled = !$("speakToggle").checked;
+};
 updatePace();
 document.addEventListener("change", (e) => {
-  if (e.target.closest(".options") || e.target === langSel) {
+  if (e.target.closest("#settings") || e.target === langSel) {
     const o = opts();
     savePrefs({ lang: o.target, gender: o.gender, speak: o.speak, pace: o.pace });
     updatePace();
@@ -90,7 +100,7 @@ $("fileInput").addEventListener("change", (e) => {
   if (f) run(f, f.name);
 });
 
-let recorder = null;
+let recorder = null, recTimer = null;
 $("recBtn").addEventListener("click", async () => {
   if (recorder) { recorder.stop(); return; }
   try {
@@ -113,28 +123,38 @@ $("recBtn").addEventListener("click", async () => {
   }
 });
 function setRecUi(on) {
-  $("recBtn").textContent = on ? "■ Stop & translate" : "● Record";
-  $("recBtn").classList.toggle("recording", on);
+  const btn = $("recBtn");
+  btn.classList.toggle("recording", on);
+  btn.querySelector("use").setAttribute("href", on ? "#i-stop" : "#i-mic");
+  clearInterval(recTimer);
+  if (on) {
+    const t0 = Date.now();
+    const tick = () => ($("recLabel").textContent = `Stop · ${fmt((Date.now() - t0) / 1000)}`);
+    tick(); recTimer = setInterval(tick, 500);
+  } else {
+    $("recLabel").textContent = "Record";
+  }
 }
 
 // ------------------------------------------------------------ pipeline
 
 let busy = false;
-let audioUrl = null;
 
 async function run(blob, filename) {
   if (busy) return;
   const key = getKey();
-  if (!key) { pendingShared = blob; showScreen(); return; }
+  if (!key) { pendingShared = { blob, name: filename }; showScreen(); return; }
   busy = true;
   const o = opts();
   const t0 = performance.now();
-  $("error").hidden = true;
-  $("result").hidden = true;
-  $("help").open = false;
-  setBusy(true);
+  const timings = {};
+  let mark = performance.now();
+  const lap = (k) => { const now = performance.now(); timings[k] = (now - mark) / 1000; mark = now; };
+
+  resetResult();
+  startProgress(o.speak);
   try {
-    setStatus("Preparing audio…");
+    setStep("listen", "active", "Preparing audio…");
     let clips;
     try {
       const samples = await decodeTo16kMono(blob);
@@ -144,31 +164,42 @@ async function run(blob, filename) {
     }
     if (!clips.length) throw new Error("This audio seems to be empty.");
 
-    setStatus(clips.length > 1 ? `Listening (${clips.length} parts)…` : "Listening…");
+    setStep("listen", "active", clips.length > 1 ? `Long note: listening to ${clips.length} parts at once…` : "Working out the language…");
     const parts = await mapLimit(clips, 4, (c) => sarvam.transcribe(key, c.blob, c.name));
     const transcript = parts.map((p) => p.transcript).filter(Boolean).join(" ");
     if (!transcript) throw new Error("No speech detected in this audio.");
     const source = dominantLanguage(parts);
+    lap("listen");
+    setStep("listen", "done", `Heard ${sarvam.languageName(source)}`);
 
     let translation = transcript;
     const skipped = source === o.target;
-    if (!skipped) {
-      setStatus(`Heard ${sarvam.languageName(source)}. Translating…`);
+    if (skipped) {
+      setStep("translate", "skipped", `Already in ${sarvam.languageName(o.target)}`);
+    } else {
+      setStep("translate", "active", `${sarvam.languageName(source)} → ${sarvam.languageName(o.target)}`);
       translation = await sarvam.translate(key, transcript, source, o.target, o.gender);
+      setStep("translate", "done", `${sarvam.languageName(source)} → ${sarvam.languageName(o.target)}`);
     }
+    lap("translate");
     showText(transcript, translation, source, o.target, skipped);
 
     if (o.speak) {
-      setStatus("Generating voice…");
+      setStep("speak", "active", `${o.gender === "male" ? "Male" : "Female"} voice`);
       const wavs = await sarvam.speak(key, translation, o.target, o.gender, o.pace);
-      showAudio(concatWavs(wavs), filename, o.target);
+      const wav = concatWavs(wavs);
+      lap("speak");
+      await showAudio(wav, filename, o.target);
     }
-    $("timing").textContent = `Done in ${((performance.now() - t0) / 1000).toFixed(1)}s`;
+    const total = (performance.now() - t0) / 1000;
+    const bits = [`Listened ${timings.listen.toFixed(1)}s`];
+    if (!skipped) bits.push(`translated ${timings.translate.toFixed(1)}s`);
+    if (timings.speak) bits.push(`voiced ${timings.speak.toFixed(1)}s`);
+    $("timing").textContent = `Done in ${total.toFixed(1)}s · ${bits.join(" · ")}`;
   } catch (err) {
     showError(err.message || String(err));
   } finally {
-    setStatus("");
-    setBusy(false);
+    stopProgress();
     busy = false;
   }
 }
@@ -187,41 +218,150 @@ async function mapLimit(items, limit, fn) {
   return out;
 }
 
-// ------------------------------------------------------------ rendering
+// ------------------------------------------------------------ progress UI
 
-function setStatus(msg) { $("status").textContent = msg; $("status").hidden = !msg; }
-function setBusy(on) {
-  $("recBtn").disabled = on && !recorder;
-  document.querySelector(".file-btn").classList.toggle("disabled", on);
+let elapsedTimer = null;
+
+function startProgress(speak) {
+  for (const li of document.querySelectorAll(".steps li")) {
+    li.className = "";
+    li.querySelector("[data-detail]").textContent = "";
+  }
+  document.querySelector('[data-step="speak"]').hidden = !speak;
+  $("inputCard").hidden = true;
+  $("progress").hidden = false;
+  const t0 = Date.now();
+  const tick = () => ($("elapsed").textContent = `${Math.floor((Date.now() - t0) / 1000)}s`);
+  tick(); elapsedTimer = setInterval(tick, 1000);
 }
-function showError(msg) { $("error").textContent = msg; $("error").hidden = false; }
+
+function setStep(step, state, detail) {
+  const li = document.querySelector(`[data-step="${step}"]`);
+  li.className = state;
+  if (detail !== undefined) li.querySelector("[data-detail]").textContent = detail;
+}
+
+function stopProgress() {
+  clearInterval(elapsedTimer);
+  $("progress").hidden = true;
+  $("inputCard").hidden = false;
+  $("inputCard").classList.toggle("compact", !$("result").hidden);
+}
+
+function showError(msg) {
+  $("error").textContent = msg;
+  $("error").hidden = false;
+}
+
+// ------------------------------------------------------------ result UI
+
+const player = $("player");
+let audioUrl = null;
+
+function resetResult() {
+  player.pause();
+  $("error").hidden = true;
+  $("result").hidden = true;
+  $("audioBox").hidden = true;
+  $("audioActions").hidden = true;
+  $("timing").textContent = "";
+  $("inputCard").classList.remove("compact");
+}
 
 function showText(transcript, translation, source, target, skipped) {
   $("translation").textContent = translation;
   $("transcript").textContent = transcript;
   $("targetLabel").textContent = sarvam.languageName(target);
-  $("sourceLabel").textContent = `Original (${sarvam.languageName(source)})` + (skipped ? " · already in your language" : "");
-  $("audioBox").hidden = true;
-  $("timing").textContent = "";
+  $("sourceLabel").textContent = skipped
+    ? `Original · ${sarvam.languageName(source)}`
+    : `Original · ${sarvam.languageName(source)}`;
+  $("transcript").classList.add("clamp");
   $("result").hidden = false;
+  requestAnimationFrame(() => {
+    const t = $("transcript");
+    $("moreBtn").hidden = t.scrollHeight <= t.clientHeight + 2;
+    $("moreBtn").textContent = "Show full original";
+  });
   $("result").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function showAudio(wavBlob, filename, target) {
+$("moreBtn").addEventListener("click", () => {
+  const clamped = $("transcript").classList.toggle("clamp");
+  $("moreBtn").textContent = clamped ? "Show full original" : "Show less";
+});
+
+async function showAudio(wavBlob, filename, target) {
   if (audioUrl) URL.revokeObjectURL(audioUrl);
   audioUrl = URL.createObjectURL(wavBlob);
   const base = (filename || "voice").replace(/\.[^.]+$/, "");
   const outName = `${base}_${target}.wav`;
-  $("player").src = audioUrl;
+  player.src = audioUrl;
   $("saveBtn").href = audioUrl;
   $("saveBtn").download = outName;
   const file = new File([wavBlob], outName, { type: "audio/wav" });
   const canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
   $("shareBtn").hidden = !canShare;
   $("shareBtn").onclick = () => navigator.share({ files: [file], title: "Translated voice note" }).catch(() => {});
+  drawWave(await wavBlob.arrayBuffer());
   $("audioBox").hidden = false;
-  $("player").play().catch(() => {}); // autoplay may be blocked; controls are there
+  $("audioActions").hidden = false;
+  player.play().catch(() => {}); // autoplay may be blocked; the play button is right there
 }
+
+// Waveform: 44-byte header written by concatWavs, then 16-bit PCM.
+const BARS = 44;
+function drawWave(buf) {
+  const pcm = new Int16Array(buf, 44, (buf.byteLength - 44) >> 1);
+  const per = Math.max(1, Math.floor(pcm.length / BARS));
+  const peaks = [];
+  for (let b = 0; b < BARS; b++) {
+    let sum = 0;
+    for (let i = b * per; i < (b + 1) * per && i < pcm.length; i += 4) sum += pcm[i] * pcm[i];
+    peaks.push(Math.sqrt(sum / (per / 4)));
+  }
+  const max = Math.max(...peaks, 1);
+  const wave = $("wave");
+  wave.replaceChildren(...peaks.map((p) => {
+    const bar = document.createElement("i");
+    bar.style.height = `${Math.max(12, Math.round((p / max) * 100))}%`;
+    return bar;
+  }));
+  paintProgress();
+}
+
+function paintProgress() {
+  const frac = player.duration ? player.currentTime / player.duration : 0;
+  const on = Math.round(frac * BARS);
+  [...$("wave").children].forEach((b, i) => b.classList.toggle("on", i < on));
+  const shown = player.paused && !player.currentTime ? player.duration : player.currentTime;
+  $("time").textContent = fmt(isFinite(shown) ? shown : 0);
+}
+
+player.addEventListener("timeupdate", paintProgress);
+player.addEventListener("loadedmetadata", paintProgress);
+player.addEventListener("play", () => setPlayIcon(true));
+player.addEventListener("pause", () => setPlayIcon(false));
+player.addEventListener("ended", () => { player.currentTime = 0; paintProgress(); });
+$("playBtn").addEventListener("click", () => (player.paused ? player.play() : player.pause()));
+function setPlayIcon(playing) {
+  $("playIcon").setAttribute("href", playing ? "#i-pause" : "#i-play");
+  $("playBtn").setAttribute("aria-label", playing ? "Pause" : "Play");
+}
+function seek(e) {
+  const r = $("wave").getBoundingClientRect();
+  if (!player.duration) return;
+  player.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * player.duration;
+  paintProgress();
+}
+$("wave").addEventListener("pointerdown", (e) => { seek(e); $("wave").setPointerCapture(e.pointerId); });
+$("wave").addEventListener("pointermove", (e) => { if (e.buttons) seek(e); });
+
+function fmt(s) {
+  s = Math.max(0, Math.round(s));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+// ------------------------------------------------------------ copy
 
 document.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-copy]");
@@ -233,7 +373,7 @@ document.addEventListener("click", async (e) => {
     const ta = Object.assign(document.createElement("textarea"), { value: text });
     document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove();
   }
-  toast("Copied");
+  toast("Copied to clipboard");
 });
 
 let toastTimer;

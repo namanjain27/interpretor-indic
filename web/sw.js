@@ -1,7 +1,7 @@
 // Service worker: offline app shell + Android "Share to Interpreter" target.
 // It never sees your API key and never talks to any server except this site.
 
-const VERSION = "v1";
+const VERSION = "v3";
 const SHELL = `shell-${VERSION}`;
 const ASSETS = [
   "./", "index.html", "styles.css", "js/app.js", "js/sarvam.js", "js/audio.js",

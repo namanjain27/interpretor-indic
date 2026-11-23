@@ -8,7 +8,8 @@
         content="default-src 'self'; connect-src 'self' https://api.sarvam.ai; media-src 'self' blob: data:; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Voice Note Interpreter</title>
   <meta name="description" content="Understand any Indian-language voice note, in your language. Powered by Sarvam AI.">
-  <meta name="theme-color" content="#7a5236">
+  <meta name="theme-color" content="#FFF8F5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1A120E" media="(prefers-color-scheme: dark)">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -18,109 +19,214 @@
   <script type="module" src="js/app.js"></script>
 </head>
 <body>
+<!-- Icon sprite -->
+<svg class="sprite" aria-hidden="true">
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M21 11.5 12.6 20a5.5 5.5 0 0 1-7.8-7.8l8.5-8.5a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m0 0-5-5m5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ear" viewBox="0 0 24 24"><path d="M3 12h2l2-5 3 10 3-14 3 12 2-5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-lang" viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2m2.5 0c-1 4-4 7-7 8.5M6.5 9c1.2 2 3 3.6 5 4.5M13 21l4-9 4 9m-6.8-3h5.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-speak" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 19V5L7.5 9.5H4Z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l.9-1.6-2-1-1 1c-1-.5-2.3-1.8-2.8-2.8l1-1-1-2L9 8.5Z" fill="currentColor"/></symbol>
+</svg>
+
 <main>
-  <header class="top">
-    <h1>Voice Note Interpreter</h1>
-    <p class="sub">Understand any Indian-language voice note, in your language.</p>
+  <header class="appbar">
+    <img src="icons/icon.svg" alt="" class="logo" width="40" height="40">
+    <div class="brand">
+      <h1>Interpreter</h1>
+      <p>Voice notes, in your language</p>
+    </div>
+    <button id="settingsBtn" class="icon-btn" type="button" aria-label="Settings" hidden>
+      <svg><use href="#i-gear"/></svg>
+    </button>
   </header>
 
-  <!-- Key screen -->
-  <section id="keyScreen" hidden>
-    <form id="keyForm" class="card" autocomplete="off">
-      <label for="keyInput">Sarvam API key</label>
+  <!-- ===================== Key / welcome screen ===================== -->
+  <section id="keyScreen" class="screen" hidden>
+    <div class="hero">
+      <h2>Got a voice note you can't understand?</h2>
+      <p>Share it here and hear it in your own language, in seconds.</p>
+    </div>
+
+    <ol class="how">
+      <li><span class="how-ic"><svg><use href="#i-ear"/></svg></span><b>Listens</b><small>any Indian language</small></li>
+      <li><span class="how-ic"><svg><use href="#i-lang"/></svg></span><b>Translates</b><small>to the one you pick</small></li>
+      <li><span class="how-ic"><svg><use href="#i-speak"/></svg></span><b>Speaks</b><small>in a natural voice</small></li>
+    </ol>
+
+    <form id="keyForm" class="card key-card" autocomplete="off">
+      <label for="keyInput">Your Sarvam API key</label>
       <input id="keyInput" type="password" placeholder="sk_..." spellcheck="false" autocapitalize="off" required>
-      <label class="check"><input id="remember" type="checkbox" checked> Remember on this device</label>
-      <button id="keyBtn" class="primary" type="submit">Continue</button>
+      <label class="check"><input id="remember" type="checkbox" checked><span>Remember on this device</span></label>
+      <button id="keyBtn" class="btn primary block" type="submit">Get started</button>
       <p id="keyError" class="error" role="alert" hidden></p>
+      <p class="hint">No key yet? It's free at <a href="https://dashboard.sarvam.ai" target="_blank" rel="noopener">dashboard.sarvam.ai</a>.</p>
     </form>
-    <p class="muted">No key? Get one free at <a href="https://dashboard.sarvam.ai" target="_blank" rel="noopener">dashboard.sarvam.ai</a>.</p>
   </section>
 
-  <!-- Main screen -->
-  <section id="mainScreen" hidden>
-    <div class="row">
-      <label for="lang">Translate to</label>
-      <select id="lang"></select>
-    </div>
+  <!-- ===================== Main screen ===================== -->
+  <section id="mainScreen" class="screen" hidden>
 
-    <details class="card options">
-      <summary>Voice &amp; options</summary>
-      <div class="seg" role="radiogroup" aria-label="Voice">
-        <label><input type="radio" name="gender" value="female" checked> Female</label>
-        <label><input type="radio" name="gender" value="male"> Male</label>
-      </div>
-      <label class="check"><input id="speakToggle" type="checkbox" checked> Read the translation aloud</label>
-      <label for="pace">Speed <output id="paceOut">1.00×</output></label>
-      <input id="pace" type="range" min="0.75" max="1.5" step="0.05" value="1">
-    </details>
-
-    <div class="actions">
-      <label class="primary big file-btn">
-        <input id="fileInput" type="file" accept="audio/*,.opus,.ogg,.oga,.m4a,.mp3,.wav,.aac,.amr,.webm,.3gp">
-        Choose voice note
+    <div class="lang-bar card">
+      <span class="lang-from">Any language</span>
+      <svg class="lang-arrow"><use href="#i-arrow"/></svg>
+      <label class="lang-to">
+        <span class="sr">Translate to</span>
+        <select id="lang"></select>
       </label>
-      <button id="recBtn" class="secondary big" type="button">● Record</button>
     </div>
 
-    <details class="card help" id="help">
-      <summary>How do I get a voice note out of WhatsApp?</summary>
-      <h3>Android (easiest)</h3>
-      <ol>
-        <li>Install this app: browser menu ⋮ → <b>Install app</b> / <b>Add to Home screen</b>.</li>
-        <li>In WhatsApp, long-press the voice note → <b>Share</b> → pick <b>Interpreter</b>.</li>
-        <li>It opens here and translates automatically.</li>
-      </ol>
-      <h3>iPhone</h3>
-      <ol>
-        <li>Long-press the voice note → <b>Forward</b> → tap the <b>Share</b> icon (bottom-right) → <b>Save to Files</b>.</li>
-        <li>Come back here → <b>Choose voice note</b> → <b>Browse</b> → pick the saved file.</li>
-        <li>To install: Safari Share button → <b>Add to Home Screen</b>.</li>
-      </ol>
-      <h3>WhatsApp Web / Desktop</h3>
-      <p>Hover the voice note → ⌄ → <b>Download</b>, then choose it here.</p>
-      <p class="muted">No conversion needed: WhatsApp's .opus/.ogg, plus .m4a, .mp3, .wav and .aac all work.
-        Someone talking in front of you? Tap <b>Record</b>.</p>
-    </details>
-
-    <p id="status" class="status" role="status" aria-live="polite" hidden></p>
-    <p id="error" class="error" role="alert" hidden></p>
-
-    <section id="result" hidden>
-      <div class="card result">
-        <div class="result-head">
-          <span id="targetLabel" class="label"></span>
-          <button class="copy" type="button" data-copy="translation">Copy</button>
-        </div>
-        <p id="translation" class="big-text"></p>
+    <!-- Input -->
+    <div id="inputCard" class="card input-card">
+      <div class="input-art" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
       </div>
-      <div id="audioBox" hidden>
-        <audio id="player" controls></audio>
-        <div class="actions">
-          <a id="saveBtn" class="secondary" download>Save audio</a>
-          <button id="shareBtn" class="secondary" type="button" hidden>Share audio</button>
-        </div>
+      <h2 class="input-title">Drop in a voice note</h2>
+      <p class="input-sub">Share it from WhatsApp, pick a file, or record someone speaking.</p>
+      <div class="input-actions">
+        <label class="btn primary file-btn">
+          <input id="fileInput" type="file" accept="audio/*,.opus,.ogg,.oga,.m4a,.mp3,.wav,.aac,.amr,.webm,.3gp">
+          <svg><use href="#i-clip"/></svg><span>Choose file</span>
+        </label>
+        <button id="recBtn" class="btn tonal" type="button">
+          <svg class="rec-ic"><use href="#i-mic"/></svg><span id="recLabel">Record</span>
+        </button>
       </div>
-      <details class="card">
-        <summary id="sourceLabel">Original</summary>
-        <div class="result-head">
-          <span class="label">Transcript</span>
-          <button class="copy" type="button" data-copy="transcript">Copy</button>
+      <button id="helpBtn" class="link-btn" type="button">
+        <svg><use href="#i-whatsapp"/></svg> How to share from WhatsApp
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div id="progress" class="card progress" hidden aria-live="polite">
+      <ol class="steps">
+        <li data-step="listen"><span class="dot"><svg><use href="#i-check"/></svg></span>
+          <div><b>Listening</b><small data-detail>Working out the language…</small></div></li>
+        <li data-step="translate"><span class="dot"><svg><use href="#i-check"/></svg></span>
+          <div><b>Translating</b><small data-detail></small></div></li>
+        <li data-step="speak"><span class="dot"><svg><use href="#i-check"/></svg></span>
+          <div><b>Creating voice</b><small data-detail></small></div></li>
+      </ol>
+      <p class="elapsed"><span id="elapsed">0s</span></p>
+    </div>
+
+    <div id="error" class="card error-card" role="alert" hidden></div>
+
+    <!-- Result -->
+    <section id="result" class="result" hidden>
+      <article class="bubble translated">
+        <header class="bubble-head">
+          <span id="targetLabel" class="pill accent"></span>
+          <button class="chip" type="button" data-copy="translation"><svg><use href="#i-copy"/></svg>Copy</button>
+        </header>
+        <p id="translation" class="bubble-text"></p>
+
+        <div id="audioBox" class="player" hidden>
+          <button id="playBtn" class="play" type="button" aria-label="Play">
+            <svg><use id="playIcon" href="#i-play"/></svg>
+          </button>
+          <div id="wave" class="wave" role="slider" aria-label="Seek" tabindex="0"></div>
+          <span id="time" class="time">0:00</span>
+          <audio id="player" preload="auto"></audio>
         </div>
-        <p id="transcript" class="big-text"></p>
-      </details>
-      <p id="timing" class="muted"></p>
+        <div id="audioActions" class="bubble-actions" hidden>
+          <button id="shareBtn" class="chip" type="button" hidden><svg><use href="#i-share"/></svg>Share audio</button>
+          <a id="saveBtn" class="chip" download><svg><use href="#i-save"/></svg>Save</a>
+        </div>
+      </article>
+
+      <article class="bubble original">
+        <header class="bubble-head">
+          <span id="sourceLabel" class="pill"></span>
+          <button class="chip" type="button" data-copy="transcript"><svg><use href="#i-copy"/></svg>Copy</button>
+        </header>
+        <p id="transcript" class="bubble-text clamp"></p>
+        <button id="moreBtn" class="link-btn small" type="button" hidden>Show full original</button>
+      </article>
+
+      <p id="timing" class="timing"></p>
     </section>
-  </section>
 
-  <button id="installBtn" class="secondary install" type="button" hidden>Install app</button>
+    <button id="installBtn" class="btn tonal block install" type="button" hidden>Install app on this phone</button>
+  </section>
 
   <footer>
-    <p class="reassure">🔒 Open source. Your key stays on your device and only ever goes to Sarvam AI.
-      <a href="https://github.com/namanjain27/interpretor-indic" target="_blank" rel="noopener">Check the code on GitHub</a></p>
-    <p class="muted"><span id="who"></span> <button id="forgetBtn" class="link" type="button" hidden>Change / forget key</button></p>
-    <p class="muted">Built by <a href="https://namanjain27.github.io/" target="_blank" rel="noopener">Naman Jain</a> · Powered by Sarvam AI</p>
+    <p><svg class="inline-ic"><use href="#i-lock"/></svg> Open source. Your key stays on your device and only ever goes to Sarvam AI.
+      <a href="https://github.com/namanjain27/interpretor-indic" target="_blank" rel="noopener">Check the code</a></p>
+    <p>Built by <a href="https://namanjain27.github.io/" target="_blank" rel="noopener">Naman Jain</a> · Powered by Sarvam AI</p>
   </footer>
 </main>
+
+<!-- ===================== Settings sheet ===================== -->
+<dialog id="settings" class="sheet">
+  <form method="dialog" class="sheet-body">
+    <header class="sheet-head">
+      <h2>Settings</h2>
+      <button class="icon-btn" value="close" aria-label="Close"><svg><use href="#i-close"/></svg></button>
+    </header>
+
+    <fieldset class="field">
+      <legend>Voice</legend>
+      <div class="seg">
+        <label><input type="radio" name="gender" value="female" checked><span>Female</span></label>
+        <label><input type="radio" name="gender" value="male"><span>Male</span></label>
+      </div>
+    </fieldset>
+
+    <label class="switch-row">
+      <span><b>Read translation aloud</b><small>Turn off for text only (faster)</small></span>
+      <input id="speakToggle" type="checkbox" class="switch" checked>
+    </label>
+
+    <div class="field">
+      <label for="pace" class="row-label"><b>Speaking speed</b><output id="paceOut">1.00×</output></label>
+      <input id="pace" type="range" min="0.75" max="1.5" step="0.05" value="1">
+    </div>
+
+    <div class="field key-info">
+      <b>Sarvam API key</b>
+      <small id="who"></small>
+      <button id="forgetBtn" class="btn tonal danger block" type="button">Forget key on this device</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ===================== WhatsApp help sheet ===================== -->
+<dialog id="help" class="sheet">
+  <form method="dialog" class="sheet-body">
+    <header class="sheet-head">
+      <h2>Share from WhatsApp</h2>
+      <button class="icon-btn" value="close" aria-label="Close"><svg><use href="#i-close"/></svg></button>
+    </header>
+    <h3><span class="pill">Android</span> easiest</h3>
+    <ol class="guide">
+      <li>Install this app: browser menu <b>⋮</b> → <b>Install app</b>.</li>
+      <li>In WhatsApp, long-press the voice note → <b>Share</b> → <b>Interpreter</b>.</li>
+      <li>It opens here and translates on its own.</li>
+    </ol>
+    <h3><span class="pill">iPhone</span></h3>
+    <ol class="guide">
+      <li>Long-press the voice note → <b>Forward</b> → tap <b>Share</b> (bottom-right) → <b>Save to Files</b>.</li>
+      <li>Back here, tap <b>Choose file</b> → <b>Browse</b> → pick it.</li>
+      <li>To install: Safari <b>Share</b> → <b>Add to Home Screen</b>.</li>
+    </ol>
+    <h3><span class="pill">WhatsApp Web</span></h3>
+    <ol class="guide"><li>Hover the voice note → <b>⌄</b> → <b>Download</b>, then choose it here.</li></ol>
+    <p class="hint">No conversion needed: .opus, .ogg, .m4a, .mp3, .wav and .aac all work.</p>
+  </form>
+</dialog>
+
 <div id="toast" class="toast" role="status" hidden></div>
 </body>
 </html>
